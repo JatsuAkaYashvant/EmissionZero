@@ -1,0 +1,81 @@
+#include <DHT.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
+#include <SoftwareSerial.h>
+
+#define DHTPIN 2         // Pin connected to DHT11 sensor
+#define DHTTYPE DHT11    // DHT11 sensor type
+#define LDR1 A0          // Analog pin connected to LDR1
+#define LDR2 A1          // Analog pin connected to LDR2
+#define LDR3 A2          // Analog pin connected to LDR3
+#define LDR4 A3          // Analog pin connected to LDR4
+#define MQ_PIN A4        // Analog pin connected to MQ-135 sensor
+#define DS18B20_PIN_1 5  // Pin connected to DS18B20 sensor 1
+#define DS18B20_PIN_2 6  // Pin connected to DS18B20 sensor 2
+#define DS18B20_PIN_3 7  // Pin connected to DS18B20 sensor 3
+#define DS18B20_PIN_4 8  // Pin connected to DS18B20 sensor 4
+
+DHT dht(DHTPIN, DHTTYPE);
+OneWire oneWire(DS18B20_PIN_1); // Change pin number for each DS18B20 sensor
+DallasTemperature sensors(&oneWire);
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+  sensors.begin();
+}
+
+void loop() {
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+  float ldr1 = analogRead(LDR1);
+  float ldr2 = analogRead(LDR2);
+  float ldr3 = analogRead(LDR3);
+  float ldr4 = analogRead(LDR4);
+  float mq_value = analogRead(MQ_PIN);
+
+  sensors.requestTemperatures();
+  float ds18b20_1 = sensors.getTempCByIndex(0);
+  
+  // Repeat for other DS18B20 sensors with different pins
+  OneWire oneWire2(DS18B20_PIN_2);
+  DallasTemperature sensors2(&oneWire2);
+  sensors2.requestTemperatures();
+  float ds18b20_2 = sensors2.getTempCByIndex(0);
+  
+  OneWire oneWire3(DS18B20_PIN_3);
+  DallasTemperature sensors3(&oneWire3);
+  sensors3.requestTemperatures();
+  float ds18b20_3 = sensors3.getTempCByIndex(0);
+  
+  OneWire oneWire4(DS18B20_PIN_4);
+  DallasTemperature sensors4(&oneWire4);
+  sensors4.requestTemperatures();
+  float ds18b20_4 = sensors4.getTempCByIndex(0);
+
+  // Print data on Serial Monitor
+  Serial.print("Humidity: ");
+  Serial.print(humidity);
+  Serial.print("%\t Temperature: ");
+  Serial.print(temperature);
+  Serial.print("°C\t LDR1: ");
+  Serial.print(ldr1);
+  Serial.print("\t LDR2: ");
+  Serial.print(ldr2);
+  Serial.print("\t LDR3: ");
+  Serial.print(ldr3);
+  Serial.print("\t LDR4: ");
+  Serial.print(ldr4);
+  Serial.print("\t MQ-135: ");
+  Serial.print(mq_value);
+  Serial.print("\t DS18B20_1: ");
+  Serial.print(ds18b20_1);
+  Serial.print("\t DS18B20_2: ");
+  Serial.print(ds18b20_2);
+  Serial.print("\t DS18B20_3: ");
+  Serial.print(ds18b20_3);
+  Serial.print("\t DS18B20_4: ");
+  Serial.println(ds18b20_4);
+
+  delay(1000); // Delay between readings
+}

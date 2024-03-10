@@ -1,0 +1,90 @@
+#include <DHT.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
+#include <SoftwareSerial.h>
+
+#define DHTPIN 2         // Pin connected to DHT11 sensor
+#define DHTTYPE DHT11    // DHT11 sensor type
+#define LDR1 A0          // Analog pin connected to LDR1
+#define LDR2 A1          // Analog pin connected to LDR2
+#define LDR3 A2          // Analog pin connected to LDR3
+#define LDR4 A3          // Analog pin connected to LDR4
+#define MQ_PIN A4        // Analog pin connected to MQ-135 sensor
+#define DS18B20_PIN_1 5  // Pin connected to DS18B20 sensor 1
+#define DS18B20_PIN_2 6  // Pin connected to DS18B20 sensor 2
+#define DS18B20_PIN_3 7  // Pin connected to DS18B20 sensor 3
+#define DS18B20_PIN_4 8  // Pin connected to DS18B20 sensor 4
+#define BT_RX_PIN 10     // RX pin of HC-05 connected to pin 10 of Arduino
+#define BT_TX_PIN 11     // TX pin of HC-05 connected to pin 11 of Arduino
+
+SoftwareSerial bluetooth(BT_RX_PIN, BT_TX_PIN); // Software serial for Bluetooth
+
+DHT dht(DHTPIN, DHTTYPE);
+OneWire oneWire(DS18B20_PIN_1); 
+DallasTemperature sensors(&oneWire);
+
+void setup() {
+  Serial.begin(9600);
+  bluetooth.begin(9600); // Initialize Bluetooth communication
+  dht.begin();
+  sensors.begin();
+}
+
+void loop() {
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+  float ldr1 = analogRead(LDR1);
+  float ldr2 = analogRead(LDR2);
+  float ldr3 = analogRead(LDR3);
+  float ldr4 = analogRead(LDR4);
+  float mq_value = analogRead(MQ_PIN);
+
+  sensors.begin(); // Begin again to ensure correct initialization
+  sensors.requestTemperatures();
+  float ds18b20_1 = sensors.getTempCByIndex(0);
+  
+  // Repeat for other DS18B20 sensors with different pins
+  OneWire oneWire2(DS18B20_PIN_2);
+  DallasTemperature sensors2(&oneWire2);
+  sensors2.begin();
+  sensors2.requestTemperatures();
+  float ds18b20_2 = sensors2.getTempCByIndex(0);
+  
+  OneWire oneWire3(DS18B20_PIN_3);
+  DallasTemperature sensors3(&oneWire3);
+  sensors3.begin();
+  sensors3.requestTemperatures();
+  float ds18b20_3 = sensors3.getTempCByIndex(0);
+  
+  OneWire oneWire4(DS18B20_PIN_4);
+  DallasTemperature sensors4(&oneWire4);
+  sensors4.begin();
+  sensors4.requestTemperatures();
+  float ds18b20_4 = sensors4.getTempCByIndex(0);
+
+  // Send data over Bluetooth
+  bluetooth.print("Humidity: ");
+  bluetooth.print(humidity);
+  bluetooth.print("%\t Temperature: ");
+  bluetooth.print(temperature);
+  bluetooth.print("°C\t LDR1: ");
+  bluetooth.print(ldr1);
+  bluetooth.print("\t LDR2: ");
+  bluetooth.print(ldr2);
+  bluetooth.print("\t LDR3: ");
+  bluetooth.print(ldr3);
+  bluetooth.print("\t LDR4: ");
+  bluetooth.print(ldr4);
+  bluetooth.print("\t MQ-135: ");
+  bluetooth.print(mq_value);
+  bluetooth.print("\t DS18B20_1: ");
+  bluetooth.print(ds18b20_1);
+  bluetooth.print("\t DS18B20_2: ");
+  bluetooth.print(ds18b20_2);
+  bluetooth.print("\t DS18B20_3: ");
+  bluetooth.print(ds18b20_3);
+  bluetooth.print("\t DS18B20_4: ");
+  bluetooth.println(ds18b20_4);
+
+  delay(1000); // Delay between readings
+}
